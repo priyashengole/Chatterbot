@@ -20,11 +20,13 @@ class Microsoft(InputAdapter):
 
         # NOTE: Direct Line client credentials are different from your bot's
         # credentials
-        self.direct_line_token_or_secret = kwargs.\
-            get('direct_line_token_or_secret')
+        self.direct_line_token_or_secret = kwargs.get(
+            'direct_line_token_or_secret'
+        )
 
-        authorization_header = 'BotConnector  {}'.\
-            format(self.direct_line_token_or_secret)
+        authorization_header = 'BotConnector  {}'.format(
+            self.direct_line_token_or_secret
+        )
 
         self.headers = {
             'Authorization': authorization_header,
@@ -61,9 +63,10 @@ class Microsoft(InputAdapter):
     def get_most_recent_message(self):
         import requests
 
-        endpoint = '{host}/api/conversations/{id}/messages'\
-            .format(host=self.directline_host,
-                    id=self.conversation_id)
+        endpoint = '{host}/api/conversations/{id}/messages'.format(
+            host=self.directline_host,
+            id=self.conversation_id
+        )
 
         response = requests.get(
             endpoint,
