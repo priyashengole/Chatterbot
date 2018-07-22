@@ -84,7 +84,7 @@ class Microsoft(InputAdapter):
             return data['messages'][last_msg - 1]
         return None
 
-    def process_input(self, statement):
+    def process_input(self, statement, conversation):
         new_message = False
         data = None
         while not new_message:
