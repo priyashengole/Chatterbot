@@ -53,51 +53,6 @@ class Statement(Base, StatementMixin):
     """
 
     text = Column(
-        String(constants.STATEMENT_TEXT_MAX_LENGTH),
-        unique=True
-    )
-
-    tags = relationship(
-        'Tag',
-        secondary=lambda: tag_association_table,
-        backref='statements'
-    )
-
-    extra_data = Column(PickleType)
-
-    in_response_to = relationship(
-        'Response',
-        back_populates='statement_table'
-    )
-
-    def get_tags(self):
-        """
-        Return a list of tags for this statement.
-        """
-        return [tag.name for tag in self.tags]
-
-    def get_statement(self):
-        from chatterbot.conversation import Statement as StatementObject
-        from chatterbot.conversation import Response as ResponseObject
-
-        statement = StatementObject(
-            self.text,
-            tags=[tag.name for tag in self.tags],
-            extra_data=self.extra_data
-        )
-        for response in self.in_response_to:
-            statement.add_response(
-                ResponseObject(text=response.text, occurrence=response.occurrence)
-            )
-        return statement
-
-
-class Response(Base):
-    """
-    Response, contains responses related to a given statement.
-    """
-
-    text = Column(
         String(constants.STATEMENT_TEXT_MAX_LENGTH)
     )
 
@@ -110,19 +65,34 @@ class Response(Base):
         server_default=func.now()
     )
 
-    occurrence = Column(
-        Integer,
-        default=1
+    tags = relationship(
+        'Tag',
+        secondary=lambda: tag_association_table,
+        backref='statements'
     )
 
-    statement_text = Column(
+    extra_data = Column(PickleType)
+
+    in_response_to = Column(
         String(constants.STATEMENT_TEXT_MAX_LENGTH),
-        ForeignKey('statement.text')
+        nullable=True
     )
 
-    statement_table = relationship(
-        'Statement',
-        back_populates='in_response_to',
-        cascade='all',
-        uselist=False
-    )
+    def get_tags(self):
+        """
+        Return a list of tags for this statement.
+        """
+        return [tag.name for tag in self.tags]
+
+    def get_statement(self):
+        from chatterbot.conversation import Statement as StatementObject
+
+        return StatementObject(
+            id=self.id,
+            text=self.text,
+            conversation=self.conversation,
+            created_at=self.created_at,
+            tags=self.get_tags(),
+            extra_data=self.extra_data,
+            in_response_to=self.in_response_to
+        )
